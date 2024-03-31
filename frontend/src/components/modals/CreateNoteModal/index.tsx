@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
 interface INote {
@@ -24,64 +24,65 @@ const CreateNoteModal: React.FC<CreateNoteModalProps> = ({
 	const [contentError, setContentError] = useState("");
 	const [isValid, setIsValid] = useState(false);
 
+	useEffect(() => {
+		validateFields();
+	}, [title, content]);
+
 	const validateFields = () => {
-		if (title.length >= 3 && content.length >= 3) {
-			setIsValid(true);
-		} else {
-			setIsValid(false);
-		}
+		const isTitleValid = title.trim().length >= 3;
+		const isContentValid = content.trim().length >= 3;
+
+		setIsValid(isTitleValid && isContentValid);
 	};
 
 	const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setTitle(e.target.value);
+		const value = e.target.value;
+		setTitle(value);
 		setTitleError(
-			e.target.value.length < 3
+			value.trim().length < 3
 				? "Title must be at least 3 characters long"
 				: ""
 		);
-		validateFields();
 	};
 
 	const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-		setContent(e.target.value);
+		const value = e.target.value;
+		setContent(value);
 		setContentError(
-			e.target.value.length < 3
+			value.trim().length < 3
 				? "Content must be at least 3 characters long"
 				: ""
 		);
-		validateFields();
 	};
 
 	const handleSubmit = async () => {
 		try {
-			if (title.length < 3 || content.length < 3) {
-				return; // Prevent submission if fields are not valid
-			}
-
-			const response = await fetch(
-				`${process.env.REACT_APP_BACKEND_URL}/notes/create`,
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						title,
-						content,
-					}),
+			if (isValid) {
+				const response = await fetch(
+					`${process.env.REACT_APP_BACKEND_URL}/notes/create`,
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							title,
+							content,
+						}),
+					}
+				);
+				if (!response.ok) {
+					throw new Error("Failed to create note");
 				}
-			);
-			if (!response.ok) {
-				throw new Error("Failed to create note");
+				const data = await response.json();
+				const newNote = { _id: data.note._id, title, content };
+
+				handleNoteCreated(newNote);
+				handleClose();
+
+				setTitle("");
+				setContent("");
 			}
-			const data = await response.json();
-			const newNote = { _id: data.note._id, title, content };
-
-			handleNoteCreated(newNote);
-			handleClose();
-
-			setTitle("");
-			setContent("");
 		} catch (error) {
 			console.error("Error creating note:", error);
 		}

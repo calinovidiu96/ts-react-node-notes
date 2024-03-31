@@ -22,3 +22,8 @@ This TypeScript-powered React / Node full-stack app is a practical Notes Manager
 The app will run on http://localhost:3000
 
 (The app is already connected to a Mongo Compass Free database instance)
+
+## 💡 Proposed improvements
+
+- Add pagination (The app was not built for a big load of notes, but implementing pagination it can handle much easier the big amounts of notes stored in database.)
+- Add a search tool

@@ -25,5 +25,5 @@ The app will run on http://localhost:3000
 
 ## 💡 Proposed improvements
 
-- Add pagination
+- Add pagination (The app was not built for a big load of notes, but implementing pagination it can handle much easier the big amounts of notes stored in database.)
 - Add a search tool
